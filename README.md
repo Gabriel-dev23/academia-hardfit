@@ -4,7 +4,7 @@ Site responsivo da academia, com FAQ, mapa, WhatsApp, faixa animada, efeitos de 
 
 ## Executar
 
-Sem dependências ou compilação. Com Python 3:
+A versão pronta para publicação inclui Motion 14.12.0 em `assets/vendor/`. Não exige compilação. Para instalar a dependência de desenvolvimento, execute `npm install`. Com Python 3:
 
 ```sh
 python -m http.server 8000
@@ -28,3 +28,7 @@ As animações respeitam a preferência de redução de movimento do dispositivo
 ## Hospedagem
 
 Publique os arquivos em um serviço de hospedagem estática. Este repositório não sincroniza automaticamente com a hospedagem original no Sites.
+
+## Motion AI Kit
+
+Skill instalada em `.agents/skills/motion/` e configurações MCP em `.codex/config.toml`. As animações usam a biblioteca gratuita Motion para entradas, rolagem, faixa contínua e gestos.

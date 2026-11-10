@@ -19,3 +19,5 @@ h2 .motion-letter{opacity:.25}.letters-visible .motion-letter.scroll-lit{opacity
 h1>.intro{animation:none!important}h1 .motion-letter{transform:none!important;filter:none!important;opacity:1!important;transition:none!important}h1 .motion-letter.typed-off{visibility:hidden}h1 .typing-cursor{position:relative}h1 .typing-cursor::after{content:'';position:absolute;right:-5px;bottom:.05em;height:.8em;width:3px;background:var(--yellow);animation:typing-blink .65s steps(1) infinite}
 @keyframes typing-blink{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){h1 .motion-letter.typed-off{visibility:visible}h1 .typing-cursor::after{display:none}}
+
+.js .reveal,.js .reveal.visible{transition:none;opacity:1;transform:none}h2 .motion-letter,h2.letters-visible .motion-letter,h2.letters-visible .motion-letter:not(.scroll-lit){transition:none;filter:none;opacity:1;transform:none}.btn,.review,.benefits article{translate:none;transition:background .25s,border-color .25s}.btn:hover,.review:hover{transform:none}.btn:active{scale:1}.hero-photo{will-change:auto}.hero-content{will-change:auto}.section-top::after{transform:scaleX(clamp(0,var(--scroll-progress,0),1))}

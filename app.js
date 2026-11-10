@@ -5,8 +5,6 @@ function closeMenu(){nav.classList.remove('open');menu.setAttribute('aria-expand
 menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Fechar menu':'Abrir menu');});
 nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
-if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target);}});},{threshold:.1});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));}else{document.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));}
-
 // Native scrolling keeps wheel, trackpad and touch behavior consistent.
 const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const finePointer=window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -31,62 +29,44 @@ headings.forEach(heading=>{
     node.replaceWith(fragment);
   });
 });
-const headingObserver='IntersectionObserver' in window?new IntersectionObserver(entries=>{
-  entries.forEach(({target,isIntersecting})=>target.classList.toggle('letters-visible',isIntersecting));
-},{threshold:.18}):null;
-headings.forEach(h=>headingObserver?headingObserver.observe(h):h.classList.add('letters-visible'));
-const sections=[...document.querySelectorAll('.section,.closing')];
-const photo=document.querySelector('.hero-photo');
-const heroContent=document.querySelector('.hero-content');
-const backgroundWord=document.querySelector('.experience-word');
-const clamp=(value,min=0,max=1)=>Math.min(max,Math.max(min,value));
-let scheduled=false;
-function renderMotion(){
-  scheduled=false;
-  const viewport=window.innerHeight;
-  const scroll=window.scrollY;
-  const total=document.documentElement.scrollHeight-viewport;
-  progress.style.transform=`scaleX(${total>0?clamp(scroll/total):0})`;
-  if(reducedMotion.matches){
-    photo.style.removeProperty('transform');heroContent.style.removeProperty('transform');heroContent.style.removeProperty('opacity');
-    sections.forEach(s=>s.style.removeProperty('--scroll-progress'));
-    return;
-  }
-  photo.style.transform=`translate3d(0,${Math.min(scroll*.24,260)}px,0) scale(1.12)`;
-  heroContent.style.transform=`translate3d(0,${Math.min(scroll*.1,90)}px,0)`;
-  heroContent.style.opacity=String(clamp(1-scroll/(viewport*.95),.15,1));
-  sections.forEach(section=>{
-    const rect=section.getBoundingClientRect();
-    if(rect.top>viewport*1.15||rect.bottom< -100)return;
-    const p=clamp((viewport-rect.top)/(viewport+rect.height));
-    section.style.setProperty('--scroll-progress',String(p));
-    section.querySelectorAll('h2 .motion-letter').forEach((letter,i,letters)=>{
-      const fill=clamp((viewport*.88-rect.top)/(viewport*.48));
-      const lit=fill>=i/letters.length;
-      letter.classList.toggle('scroll-lit',lit);
-    });
+const {animate,scroll,inView,stagger,hover,press}=Motion;
+const motionCleanups=[];
+let tickerAnimation;
+function setupMotion(){
+  while(motionCleanups.length)motionCleanups.pop()();
+  document.querySelectorAll('.reveal').forEach(el=>{el.classList.add('visible');el.style.opacity='1';el.style.transform='none';});
+  document.querySelectorAll('h2').forEach(el=>el.classList.add('letters-visible'));
+  if(reducedMotion.matches)return;
+  document.querySelectorAll('.reveal').forEach(el=>{
+    const animation=animate(el,{opacity:[0,1],y:[40,0]},{duration:.65,type:'spring',bounce:.12,autoplay:false});
+    const stop=inView(el,()=>{animation.play();},{amount:.12});
+    motionCleanups.push(()=>{stop();animation.complete();});
   });
-  const rect=document.querySelector('.experience').getBoundingClientRect();
-  if(rect.top<viewport&&rect.bottom>0)backgroundWord.style.translate=`0 ${(viewport*.5-rect.top)*.12}px`;
+  document.querySelectorAll('h2').forEach(heading=>{
+    const letters=[...heading.querySelectorAll('.motion-letter')];
+    const animation=animate(letters,{opacity:[.15,1],y:[24,0],rotateX:[35,0]},{duration:.55,delay:stagger(.018),ease:'easeOut',autoplay:false});
+    const stop=inView(heading,()=>{animation.play();},{amount:.3});
+    motionCleanups.push(()=>{stop();animation.complete();});
+  });
+  const photo=document.querySelector('.hero-photo');
+  const hero=document.querySelector('.hero');
+  motionCleanups.push(scroll(animate(photo,{y:[0,180],scale:[1.12,1.25]},{ease:'linear'}),{target:hero,offset:['start start','end start']}));
+  motionCleanups.push(scroll(animate(document.querySelector('.experience-word'),{y:[-60,90]},{ease:'linear'}),{target:document.querySelector('.experience'),offset:['start end','end start']}));
+  motionCleanups.push(scroll(animate(progress,{scaleX:[0,1]},{ease:'linear'})));
+  document.querySelectorAll('.section-top').forEach(line=>{
+    motionCleanups.push(scroll(animate(line,{'--scroll-progress':[0,1]},{ease:'linear'}),{target:line,offset:['start end','start center']}));
+  });
+  motionCleanups.push(hover('.btn,.review,.benefits article',element=>{
+    const button=element.classList.contains('btn');
+    animate(element,{scale:button?1.035:1.015,y:-5},{type:'spring',stiffness:300,damping:22});
+    return ()=>animate(element,{scale:1,y:0},{type:'spring',stiffness:300,damping:22});
+  }));
+  motionCleanups.push(press('.btn',element=>{
+    animate(element,{scale:.96},{duration:.12});
+    return ()=>animate(element,{scale:1},{type:'spring',stiffness:400,damping:20});
+  }));
 }
-function requestMotion(){if(!scheduled){scheduled=true;requestAnimationFrame(renderMotion);}}
-window.addEventListener('scroll',requestMotion,{passive:true});
-window.addEventListener('resize',requestMotion,{passive:true});
-reducedMotion.addEventListener('change',requestMotion);
-requestMotion();
-document.querySelectorAll('.btn,.review,.benefits article').forEach(element=>{
-  element.addEventListener('pointermove',event=>{
-    if(reducedMotion.matches||!finePointer.matches||event.pointerType==='touch')return;
-    const rect=element.getBoundingClientRect();
-    const x=(event.clientX-rect.left)/rect.width-.5;
-    const y=(event.clientY-rect.top)/rect.height-.5;
-    element.style.setProperty('--pointer-x',`${x*8}px`);
-    element.style.setProperty('--pointer-y',`${y*6}px`);
-    element.style.setProperty('--glow-x',`${(x+.5)*100}%`);
-    element.style.setProperty('--glow-y',`${(y+.5)*100}%`);
-  });
-  element.addEventListener('pointerleave',()=>{element.style.setProperty('--pointer-x','0px');element.style.setProperty('--pointer-y','0px');});
-});
+setupMotion();
 
 // A seamless lateral marquee, with two identical groups for an exact loop.
 const tickerTrack=document.querySelector('.ticker > div');
@@ -94,12 +74,11 @@ const tickerGroup=document.createElement('span');
 tickerGroup.className='ticker-group';
 tickerGroup.innerHTML='FORÇA <i>✳</i> EVOLUÇÃO <i>✳</i> BEM-ESTAR <i>✳</i> HARD FIT <i>✳</i> '.repeat(3);
 tickerTrack.replaceChildren(tickerGroup,tickerGroup.cloneNode(true));
-let tickerAnimation;
 function startTicker(){
-  tickerAnimation?.cancel();
+  tickerAnimation?.stop();
   if(reducedMotion.matches)return;
   const distance=tickerGroup.getBoundingClientRect().width;
-  tickerAnimation=tickerTrack.animate([{transform:'translateX(0)'},{transform:`translateX(-${distance}px)`}],{duration:distance/65*1000,iterations:Infinity,easing:'linear'});
+  tickerAnimation=animate(tickerTrack,{x:[0,-distance]},{duration:distance/65,repeat:Infinity,ease:'linear'});
 }
 startTicker();
 document.fonts?.ready.then(startTicker);
@@ -128,4 +107,4 @@ function startTyping(){
   typingTimer=setTimeout(typeNext,450);
 }
 startTyping();
-reducedMotion.addEventListener('change',()=>{startTicker();startTyping();});
+reducedMotion.addEventListener('change',()=>{setupMotion();startTicker();startTyping();});
