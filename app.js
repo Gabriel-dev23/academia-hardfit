@@ -1,3 +1,4 @@
+import {animate,scroll,inView,stagger,hover,press} from 'motion'
 document.documentElement.classList.add('js');
 const menu=document.querySelector('.menu');
 const nav=document.querySelector('nav');
@@ -29,7 +30,6 @@ headings.forEach(heading=>{
     node.replaceWith(fragment);
   });
 });
-const {animate,scroll,inView,stagger,hover,press}=Motion;
 const motionCleanups=[];
 let tickerAnimation;
 function setupMotion(){

@@ -1,34 +1,39 @@
 # HardFit Mogi Moderno
 
-Site responsivo da academia, com FAQ, mapa, WhatsApp, faixa animada, efeitos de rolagem e títulos com efeito de digitação.
+Site da HardFit com animações Motion, FAQ, mapa, WhatsApp, rodapé React Doodle Crew e fundo SVG DotPattern.
 
-## Executar
-
-A versão pronta para publicação inclui Motion 14.12.0 em `assets/vendor/`. Não exige compilação. Para instalar a dependência de desenvolvimento, execute `npm install`. Com Python 3:
+## Desenvolvimento
 
 ```sh
-python -m http.server 8000
+npm install
+npm run dev
 ```
 
-Abra http://localhost:8000.
+## Verificação e publicação
 
-## Arquivos
+```sh
+npm run check
+npm run build
+```
 
-- `index.html`: conteúdo e estrutura.
-- `style.css`: visual, responsividade e animações.
-- `app.js`: navegação e interações.
-- `assets/`: símbolo gráfico e foto ilustrativa.
+Publique a pasta `dist/` em uma hospedagem estática. O repositório não sincroniza automaticamente com Sites.
 
-## Conteúdo
+## Estrutura
 
-Foto ilustrativa do Unsplash. Google Fonts e Google Maps precisam de internet. Horários e avaliações refletem os dados fornecidos na criação do site e devem ser atualizados pela academia. Consulte planos pelo WhatsApp.
+- `index.html`, `app.js`, `style.css`: página e animações existentes.
+- `src/main.tsx`: montagem dos componentes React, com dados da HardFit.
+- `components/ui/doodle-crew-footer.tsx`: componente fornecido, personalizado via props.
+- `components/ui/dot-pattern.tsx`: SVG responsivo de pontos com IDs exclusivos por instância.
+- `components/ui/dot-pattern-demo.tsx`: demonstração isolada do padrão.
+- `styles/globals.css`: Tailwind e estilos dos componentes React.
+- `lib/utils.ts`: utilitário `cn` com clsx e tailwind-merge.
+- `public/assets/`: imagem ilustrativa e símbolo da marca.
+- `components.json`: configuração compatível com a estrutura shadcn.
 
-As animações respeitam a preferência de redução de movimento do dispositivo.
+A pasta `components/ui` foi criada para manter os componentes reutilizáveis no caminho esperado pelo alias `@/components/ui` e pelo shadcn. O alias `@` aponta para a raiz no Vite e no TypeScript. Não há providers adicionais.
 
-## Hospedagem
+React, React DOM, TypeScript, Vite e Tailwind estão instalados e configurados. Para adicionar componentes shadcn no futuro, use `npx shadcn@latest add <componente>`; não é necessário reinicializar o projeto. Tailwind é carregado sem preflight global para preservar o layout anterior.
 
-Publique os arquivos em um serviço de hospedagem estática. Este repositório não sincroniza automaticamente com a hospedagem original no Sites.
+O rodapé recebe links reais, cores, textos em português e personagens por props; não precisa de imagens externas ou lucide-react. O DotPattern é decorativo, usa SVG inline, não intercepta cliques e está aplicado ao fundo da seção Experiência. A biblioteca Motion controla os efeitos da página. As animações respeitam redução de movimento.
 
-## Motion AI Kit
-
-Skill instalada em `.agents/skills/motion/` e configurações MCP em `.codex/config.toml`. As animações usam a biblioteca gratuita Motion para entradas, rolagem, faixa contínua e gestos.
+Imagem de academia ilustrativa do Unsplash. Google Fonts e Maps precisam de internet. Horários e avaliações refletem os dados fornecidos e devem ser mantidos atualizados pela academia.

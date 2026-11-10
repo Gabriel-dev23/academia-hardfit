@@ -1,0 +1,13 @@
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@source '../components';
+@source '../src';
+:root { --color-background: #101110; --color-foreground: #f6f6ee; }
+#doodle-footer { width:100%; }
+#doodle-footer .dcf { padding:0; gap:0; }
+#doodle-footer .dcf h3 { font-family:Barlow,Arial,sans-serif; }
+#doodle-footer .dcf-copy { font-size:12px; }
+
+.experience-dot-pattern { position:absolute;inset:0;pointer-events:none;z-index:0; }
+.experience-inner { position:relative;z-index:1; }
